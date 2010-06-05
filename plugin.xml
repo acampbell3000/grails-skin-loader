@@ -1,0 +1,28 @@
+<plugin name='skin-loader' version='1.0.7' grailsVersion='1.3.0 &gt; *'>
+  <author>Anthony Campbell</author>
+  <authorEmail>acampbell3000 [[at] googlemail [dot]] com </authorEmail>
+  <title>Skin Loader for the Grails Web Framework</title>
+  <description>\
+A simple plug-in which provides the ability to load "skins" into your application or plug-in.
+
+The plug-in is designed to speed up the process further when developing grails applications. It will install templates, layout, images, CSS, JavaScript, i18n, configuration, Groovy / Java sources, utilities, services, and tag libraries into the relevant folders from an existing skin folder. Particularly useful for developers who use Grails frequently and find themselves performing these steps manually.
+
+Grails Skin Loader by default also comes with the "remote-forms" skin. This will scaffold Ajax based forms which will provide real time validation when the form is used.
+
+To install, run the following command:
+
+	grails load-skin
+
+</description>
+  <documentation>http://grails.org/plugin/skin-loader</documentation>
+  <resources>
+    <resource>BootStrap</resource>
+    <resource>BuildConfig</resource>
+    <resource>Config</resource>
+    <resource>DataSource</resource>
+    <resource>UrlMappings</resource>
+    <resource>spring.resources</resource>
+  </resources>
+  <dependencies />
+  <behavior />
+</plugin>
