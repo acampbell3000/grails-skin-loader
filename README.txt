@@ -1,4 +1,4 @@
-Copyright 2010 Anthony Campbell
+Copyright 2010 Anthony Campbell (anthonycampbell.co.uk)
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -39,6 +39,7 @@ class change. This helps reduce the plug-in's complexity, management, and
 hopefully increase the plug-in's uptake.
 
 If you find any issues, please submit a bug on JIRA:
+
      http://jira.codehaus.org/browse/GRAILSPLUGINS
 
 Please look at the CHANGES file to see what has changed since the last 

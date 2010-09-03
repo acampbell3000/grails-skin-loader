@@ -1,5 +1,5 @@
 /*
- * Copyright 2010 Anthony Campbell
+ * Copyright 2010 Anthony Campbell (anthonycampbell.co.uk)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,7 +18,7 @@
  * Groovy Ant Script that installs a skin. Based on Scaffold Tag
  * Plugin by Daiji Takamoro.
  * 
- * @author Anthony Campbell - anthonycampbell.co.uk
+ * @author Anthony Campbell (anthonycampbell.co.uk)
  */
 grailsHome = Ant.antProject.properties."environment.GRAILS_HOME"
 includeTargets << grailsScript( "Init" )

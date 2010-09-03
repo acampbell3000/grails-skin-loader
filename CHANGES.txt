@@ -5,6 +5,7 @@ Potential improvements:
 - Script update recommended by Peter Ledbrook for GRAILS-6239.
 - Move source to GitHub.
 - Add messageSource to controller template for validate method.
+- Validate method add more ?. null handlers.
 
 Release notes for 1.0.7 (TBA)
 - Footer output update.
