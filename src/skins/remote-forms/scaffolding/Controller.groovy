@@ -1,4 +1,20 @@
-<%=packageName ? "package ${packageName}\n\n" : ''%>import org.springframework.web.servlet.support.RequestContextUtils as RCU;
+<%=packageName ? "package ${packageName}\n\n" : ''%>/**
+ * Copyright 2010 Anthony Campbell (anthonycampbell.co.uk)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+import org.springframework.web.servlet.support.RequestContextUtils as RCU;
 
 /**
  * ${className} controller
@@ -84,9 +100,9 @@ class ${className}Controller {
      * Initialise form and render view
      */
     def create = {
+        flash.message = ""
         final def ${propertyName} = new ${className}()
         ${propertyName}.properties = params
-        flash.message = ""
         return [${propertyName}: ${propertyName}]
     }
 
@@ -98,7 +114,8 @@ class ${className}Controller {
 
         // Check whether ${lowerCaseName} exists
         if (!${propertyName}) {
-            flash.message = "\${message(code: 'default.not.found.message', args: [message(code: '${domainClass.propertyName}.label', default: '${className}'), params.id])}"
+            flash.message = message(code: 'default.not.found.message',
+                args: [message(code: '${domainClass.propertyName}.label', default: '${className}'), params.id])
             redirect(action: "list")
         } else {
             flash.message = ""
@@ -117,15 +134,18 @@ class ${className}Controller {
             try {
 				// Attempt delete
                 ${propertyName}.delete(flush: true)
-                flash.message = "\${message(code: 'default.deleted.message', args: [message(code: '${domainClass.propertyName}.label', default: '${className}'), params.id])}"
+                flash.message = message(code: "default.deleted.message",
+                    args: [message(code: "${domainClass.propertyName}.label", default: "${className}"), params.id])
                 redirect(action: "list")
 
-            } catch (org.springframework.dao.DataIntegrityViolationException e) {
-                flash.message = "\${message(code: 'default.not.deleted.message', args: [message(code: '${domainClass.propertyName}.label', default: '${className}'), params.id])}"
+            } catch (org.springframework.dao.DataIntegrityViolationException dive) {
+                flash.message = message(code: "default.not.deleted.message",
+                    args: [message(code: "${domainClass.propertyName}.label", default: "${className}"), params.id])
                 redirect(action: "show", id: params.id)
             }
         } else {
-            flash.message = "\${message(code: 'default.not.found.message', args: [message(code: '${domainClass.propertyName}.label', default: '${className}'), params.id])}"
+            flash.message = message(code: "default.not.found.message",
+                args: [message(code: "${domainClass.propertyName}.label", default: "${className}"), params.id])
             redirect(action: "list")
         }
     }
@@ -141,24 +161,23 @@ class ${className}Controller {
 
         // Get selected field
         for (param in params) {
-            if (param.key != null && !param.key.equals("action")
-                && !param.key.equals("controller")) {
-                field = param.key
+            if (param?.key && !param?.key?.equals("action")
+                    && !param?.key?.equals("controller")) {
+                field = param?.key
                 break
             }
         }
 
-		log.debug("Validating field: " + field)
+		log.debug "Validating field: $field"
 
         // Check whether provided field has errors
-        if (!${propertyName}.validate() && ${propertyName}.errors.hasFieldErrors(field)) {
+        if (!${propertyName}?.validate() && ${propertyName}?.errors?.hasFieldErrors(field)) {
 			// Get error message value
-            errorMessage = messageSource.getMessage(
-                ${propertyName}.errors.getFieldError(field),
-                RCU.getLocale(request)
-            )
+            errorMessage = messageSource?.getMessage(
+                ${propertyName}?.errors?.getFieldError(field),
+                RCU.getLocale(request))
 
-			log.debug("Error message: " + errorMessage)
+			log.debug "Error message: $errorMessage"
         }
 
         // Render error message
@@ -179,7 +198,8 @@ class ${className}Controller {
 
         log.debug("Display list with " + listView + " view")
 
-        render(view: listView, model: [${propertyName}List: ${className}.list(params), ${propertyName}Total: ${className}.count()])
+        render(view: listView, model: [${propertyName}List: ${className}.list(params),
+                ${propertyName}Total: ${className}.count()])
     }
 
     /**
@@ -194,10 +214,11 @@ class ${className}Controller {
 
         // Check whether ${lowerCaseName} exists
         if (!${propertyName}) {
-            flash.message = "\${message(code: 'default.not.found.message', args: [message(code: '${domainClass.propertyName}.label', default: '${className}'), params.id])}"
+            flash.message = message(code: "default.not.found.message",
+                args: [message(code: "${domainClass.propertyName}.label", default: "${className}"), params.id])
             redirect(action: "list")
 		} else {
-            log.debug("Display ${lowerCaseName} with " + showView + " view")
+            log.debug "Display ${lowerCaseName} with $showView view"
 
             render(view: showView, model: [${propertyName}: ${propertyName}])
         }
@@ -219,7 +240,7 @@ class ${className}Controller {
             showView = "_show"
         }
 
-		log.debug("Attempting to update an instance of ${className} (isAjax = " + isAjax + ")")
+		log.debug "Attempting to update an instance of ${className} (isAjax = $isAjax)"
 
         // Check whether ${lowerCaseName} exists
         if (${propertyName}) {
@@ -228,7 +249,7 @@ class ${className}Controller {
                 def version = params.version.toLong()
                 if (${propertyName}.version > version) {
                     ${propertyName}.errors.rejectValue("version", "default.optimistic.locking.failure",
-						[message(code: '${domainClass.propertyName}.label', default: '${className}')] as Object[],
+						[message(code: "${domainClass.propertyName}.label", default: "${className}")] as Object[],
 						"Another user has updated this ${className} while you were editing")
                     render(view: editView, model: [${propertyName}: ${propertyName}])
                     return
@@ -240,13 +261,15 @@ class ${className}Controller {
 
 			// Perform update
             if (!${propertyName}.hasErrors() && ${propertyName}.save(flush: true)) {
-                flash.message = "\${message(code: 'default.updated.message', args: [message(code: '${domainClass.propertyName}.label', default: '${className}'), ${propertyName}.id])}"
+                flash.message = message(code: "default.updated.message",
+                    args: [message(code: "${domainClass.propertyName}.label", default: "${className}"), ${propertyName}.id])
 				render(view: showView, model: [${propertyName}: ${propertyName}])
             } else {
                 render(view: editView, model: [${propertyName}: ${propertyName}])
             }
         } else {
-            flash.message = "\${message(code: 'default.not.found.message', args: [message(code: '${domainClass.propertyName}.label', default: '${className}'), params.id])}"
+            flash.message = message(code: "default.not.found.message",
+                args: [message(code: "${domainClass.propertyName}.label", default: "${className}"), params.id])
             redirect(action: "list")
         }
     }
@@ -267,10 +290,11 @@ class ${className}Controller {
             createView = "_create"
         }
 
-		log.debug("Attempting to save an instance of ${className} (isAjax = " + isAjax + ")")
+		log.debug "Attempting to save an instance of ${className} (isAjax = $isAjax)"
 
         if (${propertyName}.save(flush: true)) {
-            flash.message = "\${message(code: 'default.created.message', args: [message(code: '${domainClass.propertyName}.label', default: '${className}'), ${propertyName}.id])}"
+            flash.message = message(code: "default.created.message",
+                args: [message(code: "${domainClass.propertyName}.label", default: "${className}"), ${propertyName}.id])
             render(view: showView, model: [${propertyName}: ${propertyName}])
         } else {
             render(view: createView, model: [${propertyName}: ${propertyName}])

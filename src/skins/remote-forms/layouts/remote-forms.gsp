@@ -9,14 +9,14 @@
         <link rel="stylesheet" href="${resource(dir:'css', file:'remote-forms.css')}" />
         <link rel="shortcut icon" href="${resource(dir:'images/icon', file:'favicon.ico')}" type="image/x-icon" />
         <g:layoutHead />
-        <g:javascript library="prototype" />
-        <g:javascript library="scriptaculous" />
-        <g:javascript library="application" />				
+        
+        <g:javascript library="jquery-1.4.2.min" />
+        <g:javascript library="application" />
     </head>
     <body>
         <div id="header">
-            <div id="loader" style="display: none;">
-                <img src="${resource(dir:'images/icon', file:'loader.gif')}" width="32" height="32" alt="${message(code: 'loading.label', default: 'Loading...')}" title="${message(code: 'loading.label', default: 'Loading...')}" />
+            <div id="loading" style="display: none;">
+                <img src="${resource(dir:'images/icon', file:'loading.gif')}" width="32" height="32" alt="${message(code: 'loading.label', default: 'Loading...')}" title="${message(code: 'loading.label', default: 'Loading...')}" />
             </div>
             <div id="logo">
                 <a href="${createLink(uri: '/')}"><img src="${resource(dir:'images', file:'logo_remote_forms.png')}" width="163" height="43" alt="remote-forms" title="remote-forms" /></a>
