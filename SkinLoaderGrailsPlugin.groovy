@@ -37,7 +37,7 @@ class SkinLoaderGrailsPlugin {
 
     // Plugin description
     def author = "Anthony Campbell"
-    def authorEmail = "acampbell3000 [[at] googlemail [dot]] com "
+    def authorEmail = "acampbell3000 [[at]] mail from google"
     def title = "Skin Loader for the Grails Web Framework"
     def description = '''\\
 A simple plug-in which provides the ability to load "skins" into your application or plug-in.
