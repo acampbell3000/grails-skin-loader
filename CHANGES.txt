@@ -3,6 +3,9 @@ VERSION: 1.0.7
 Potential improvements:
 - TextTagLibrary refactor.
 
+Release notes for 1.0.7 (TBA)
+- 
+
 Release notes for 1.0.7 (8th September, 2010)
 - Footer output update.
 - Remove redundant i18n files.
