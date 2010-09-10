@@ -1,6 +1,6 @@
 <plugin name='skin-loader' version='1.0.7' grailsVersion='1.3.0 &gt; *'>
   <author>Anthony Campbell</author>
-  <authorEmail>acampbell3000 [[at] googlemail [dot]] com </authorEmail>
+  <authorEmail>acampbell3000 [[at]] mail from google</authorEmail>
   <title>Skin Loader for the Grails Web Framework</title>
   <description>\
 A simple plug-in which provides the ability to load "skins" into your application or plug-in.
