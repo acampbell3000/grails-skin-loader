@@ -5,6 +5,7 @@
 .settings
 *.log
 *.ser
+*.zip
 plugin.xml
 grails-app/conf/Config.groovy
 grails-app/conf/DataSource.groovy
