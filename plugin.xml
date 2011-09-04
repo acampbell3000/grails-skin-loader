@@ -15,12 +15,9 @@ To install, run the following command:
 
 </description>
   <documentation>http://grails.org/plugin/skin-loader</documentation>
+  <type>SkinLoaderGrailsPlugin</type>
   <resources>
     <resource>BootStrap</resource>
-    <resource>BuildConfig</resource>
-    <resource>Config</resource>
-    <resource>DataSource</resource>
-    <resource>UrlMappings</resource>
     <resource>spring.resources</resource>
   </resources>
   <dependencies />

@@ -1,0 +1,15 @@
+.svn
+.svn/entries
+.classpath
+.project
+.settings
+*.log
+*.ser
+plugin.xml
+grails-app/conf/Config.groovy
+grails-app/conf/DataSource.groovy
+grails/i18n/
+docs/
+target/
+target-eclipse/
+temp/

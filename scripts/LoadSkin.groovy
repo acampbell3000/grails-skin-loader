@@ -30,34 +30,34 @@ target (loadSkin: "Installs a skin from the plugin skin directory") {
     depends(init, parseArguments)
 
     // Get plug-in version number
-    final def version = metadata["plugins.skin-loader"]
+    def version = metadata["plugins.skin-loader"]
     if (!version) {
         version = metadata?.getApplicationVersion()
     }
     
-    pluginHome = "${pluginsHome}/skin-loader-${version}"
-    pluginSkins = "${pluginHome}/src/skins"
-    appSkins = "${basedir}/src/skins"
+    final def pluginHome = "${pluginsHome}/skin-loader-${version}"
+    final def pluginSkins = "${pluginHome}/src/skins"
+    final def appSkins = "${basedir}/src/skins"
 
 	// Initial output
-	println "\n====== Grails Skin Loader (${version}) ======\n"
-	println "Base directory: ${basedir}"
-	println "Plug-in home: ${pluginHome}"
+	println "\n======= Grails Skin Loader (${version}) =======\n"
+	println "         Base directory: ${basedir}"
+	println "   Base skins directory: ${appSkins}"
+	println "           Plug-in home: ${pluginHome}"
 	println "Plug-in skins directory: ${pluginSkins}"
-	println "Base skins directory: ${appSkins}"
-	println "\n================ BEGIN =================\n"
+	println "\n================= BEGIN ==================\n"
     
     // Obtain the skin name; make sure it exists
-    pluginArgs = argsMap['params']
-    skin = pluginArgs[0]
-    first = true
+    def pluginArgs = argsMap['params']
+    def skin = pluginArgs[0]
+    def first = true
 
     // Check we have skin name
     while (first || !skin) {
         first = false
         
         // Get list of available skins
-        availableSkins = new File(pluginSkins)?.list()?.toList()
+        final def availableSkins = new File(pluginSkins)?.list()?.toList()
 
         // Check whether base directory also contains any skins
         if (new File(appSkins)?.exists()) {
@@ -65,24 +65,29 @@ target (loadSkin: "Installs a skin from the plugin skin directory") {
         }
 
         // If not parameter provided list all skins
-        if (!skin) {
-            println "Available skins under grails-app/skins directories:"
-            availableSkins?.each {
-                println "\t${it}"
-            }
-            
-            println "Skin name not specified. Please enter:"
-            BufferedReader br = new BufferedReader(new InputStreamReader(System.in))
-            skin = br?.readLine()
-        }
-
-        if (!availableSkins?.contains(skin)) {
-            println "Skin \"${skin}\" not available!"
-            skin = null
-        }
+		if (!availableSkins?.isEmpty()) {
+	        if (!skin) {
+	            println "Available skins under grails-app/skins directories:"
+	            availableSkins?.each {
+	                println "\t${it}"
+	            }
+	            
+	            println "Skin name not specified. Please enter:"
+	            final BufferedReader br = new BufferedReader(new InputStreamReader(System.in))
+	            skin = br?.readLine()
+	        }
+	
+	        if (!availableSkins?.contains(skin)) {
+	            println "Skin \"${skin}\" is not available!"
+				skin = null
+	        }
+    	} else {
+			println "No skins are currently installed!"
+			System.exit(0)
+		}
     }
 
-    skinDir = "${appSkins}/${skin}"
+    def skinDir = "${appSkins}/${skin}"
     if (!new File(skinDir)?.exists()) {
         skinDir = "${pluginSkins}/${skin}"
     }
@@ -90,7 +95,7 @@ target (loadSkin: "Installs a skin from the plugin skin directory") {
     println "Skin directory: ${skinDir}\n\n"
     
     // Establish initial variables
-    skinSources = [ conf: "${skinDir}/conf",
+    final def skinSources = [ conf: "${skinDir}/conf",
                 scaffolding: "${skinDir}/scaffolding",
                 layouts: "${skinDir}/layouts",
                 taglib: "${skinDir}/taglib",
@@ -103,7 +108,7 @@ target (loadSkin: "Installs a skin from the plugin skin directory") {
                 services: "${skinDir}/services",
                 utils: "${skinDir}/utils",
                 integration: "${skinDir}/test/integration" ]
-    baseSources = [ conf: "${basedir}/grails-app/conf",
+    final def baseSources = [ conf: "${basedir}/grails-app/conf",
                 scaffolding: "${basedir}/src/templates/scaffolding",
                 layouts: "${basedir}/grails-app/views/layouts",
                 taglib: "${basedir}/grails-app/taglib",
@@ -116,14 +121,14 @@ target (loadSkin: "Installs a skin from the plugin skin directory") {
                 services: "${basedir}/grails-app/services",
                 utils: "${basedir}/grails-app/utils",
                 integration: "${basedir}/test/integration" ]
-    clearTargets = [ 'scaffolding', 'layouts', 'css', 'images', 'js' ]
-    skinSourceFiles = [ index: "${skinDir}/index.gsp" ]
-    baseSourceFiles = [ index: "${basedir}/grails-app/views/index.gsp" ]
+    final def clearTargets = [ 'scaffolding', 'layouts', 'css', 'images', 'js' ]
+    final def skinSourceFiles = [ index: "${skinDir}/index.gsp" ]
+    final def baseSourceFiles = [ index: "${basedir}/grails-app/views/index.gsp" ]
     
     // Prompt the user if any overwrites will occur before starting copy
     println "Checking for pre-existing files..."
     skinSources.each { sourceType, sourcePath ->
-        sourceDir = new File(sourcePath)
+        final def sourceDir = new File(sourcePath)
         if (sourceDir?.exists()) {
             targetPath = baseSources[sourceType]
             targetDir = new File(targetPath)
