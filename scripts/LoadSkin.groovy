@@ -1,4 +1,4 @@
-/*
+/**
  * Copyright 2010 Anthony Campbell (anthonycampbell.co.uk)
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +14,8 @@
  * limitations under the License.
  */
 
+import org.codehaus.groovy.grails.plugins.GrailsPluginInfo
+ 
 /**
  * Groovy Ant Script that installs a skin. Based on Scaffold Tag
  * Plugin by Daiji Takamoro.
@@ -21,20 +23,32 @@
  * @author Anthony Campbell (anthonycampbell.co.uk)
  */
 grailsHome = Ant.antProject.properties."environment.GRAILS_HOME"
-includeTargets << grailsScript( "_GrailsInit" )
+includeTargets << grailsScript("_GrailsInit")
+//includeTargets << grailsScript("_PluginDependencies")
 
 // Override default to run load-skin instead of init
 setDefaultTarget("loadSkin")
 
 target (loadSkin: "Installs a skin from the plugin skin directory") {
     depends(init, parseArguments)
-
-    // Get plug-in version number
-    def version = metadata["plugins.skin-loader"]
+	
+	// Let's try to get plug-in version number first from loaded plugins metadata
+	def version
+	final def pluginInfos = pluginSettings?.getPluginInfos()
+	if (pluginInfos) {
+		for (final GrailsPluginInfo pluginInfo in pluginInfos) {
+			if (pluginInfo?.name == "skin-loader") {
+				version = pluginInfo?.version
+			}
+		}
+	}
+	
+    // If still not available, the plug-in is the grails application running
     if (!version) {
         version = metadata?.getApplicationVersion()
     }
     
+	// Plug-in directories
     final def pluginHome = "${pluginsHome}/skin-loader-${version}"
     final def pluginSkins = "${pluginHome}/src/skins"
     final def appSkins = "${basedir}/src/skins"

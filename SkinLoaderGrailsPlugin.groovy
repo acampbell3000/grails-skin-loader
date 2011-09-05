@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-/*
+/**
  * Skin Loader Plug-in
  *
  * A simple plug-in which provides a skin loader for your Grails
@@ -25,7 +25,7 @@
  */
 class SkinLoaderGrailsPlugin {
     // the plugin version
-    def version = "1.0.8"
+    def version = "1.0.9"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.0.0.M1"
     // the other plugins this plugin depends on
@@ -43,4 +43,19 @@ class SkinLoaderGrailsPlugin {
 
     // URL to the plugin's documentation
     def documentation = "http://grails.org/plugin/skin-loader"
+
+    // License: one of 'APACHE', 'GPL2', 'GPL3'
+    def license = "APACHE"
+
+    // Details of company behind the plugin (if there is one)
+    def organization = [ name: "Anthony Campbell", url: "http://anthonycampbell.co.uk" ]
+
+    // Any additional developers beyond the author specified above.
+//  def developers = [ [ name: "Joe Bloggs", email: "joe@bloggs.net" ]]
+
+    // Location of the plugin's issue tracker.
+//  def issueManagement = [ system: "JIRA", url: "http://jira.grails.org/browse/GPMYPLUGIN" ]
+
+    // Online location of the plugin's browseable source code.
+    def scm = [ url: "https://github.com/acampbell3000/grails-skin-loader" 
 }
