@@ -57,5 +57,5 @@ class SkinLoaderGrailsPlugin {
 //  def issueManagement = [ system: "JIRA", url: "http://jira.grails.org/browse/GPMYPLUGIN" ]
 
     // Online location of the plugin's browseable source code.
-    def scm = [ url: "https://github.com/acampbell3000/grails-skin-loader" 
+    def scm = [ url: "https://github.com/acampbell3000/grails-skin-loader" ]
 }
