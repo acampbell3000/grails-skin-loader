@@ -53,8 +53,7 @@
 			sb << 'cols="40" rows="5" '
 			if (cp.maxSize) sb << 'maxlength="' << cp.maxSize << '" '
 			if (isRequired()) sb << 'required="" '
-			sb << ' value="${' << "${domainInstance}?.${property.name}" << '}"'
-			sb << '/>'
+			sb << ' value="${' << "${domainInstance}?.${property.name}" << '}" />'
 			
         } else if (cp.inList) {
 			sb << '<g:remoteSelect id="' << property.name << '" name="' << property.name << '" '
@@ -68,75 +67,26 @@
 			
 		} else {
 			if (cp.password) {
-				sb << '<g:field type="password"'
+				sb << '<g:field type="password" '
 			} else if (cp.url) {
-				sb << '<g:field type="url"'
+				sb << '<g:field type="url" '
 			} else if (cp.email) {
-				sb << '<g:field type="email"'
+				sb << '<g:field type="email" '
 			} else {
-				sb << '<g:textField'
+				sb << '<g:remoteText '
 			}
 			
-			sb << ' name="' << property.name << '"'
-			if (cp.maxSize) sb << ' maxlength="' << cp.maxSize << '"'
-			if (!cp.editable) sb << ' readonly="readonly"'
-			if (cp.matches) sb << ' pattern="${' << "${domainInstance}.constraints.${property.name}.matches" << '}"'
-			if (isRequired()) sb << ' required=""'
-			sb << ' value="${' << "${domainInstance}?.${property.name}" << '}"'
-			sb << '/>'
-			
-			
-                def sb = new StringBuffer("<g:remoteText ")
-
-                if (cp.password) sb << "password=\"password\" "
-                sb << "id=\"${property.name}\" "
-                sb << "name=\"${property.name}\" "
-                sb << "paramName=\"${property.name}\" "
-                sb << "action=\"validate\" "
-                sb << "update=\"${property.name}Flash\" "
-
-                if (cp.maxSize) sb << "maxlength=\"${cp.maxSize}\" "
-                if (!cp.editable) sb << "readonly=\"readonly\" "
-                sb << "value=\"\${${domainInstance}?.${property.name}}\""
-                sb << " />"
-
-                return sb.toString()
+			sb << 'id="' << property.name << '" name="' << property.name << '" '
+            sb << 'paramName="' << property.name << '" action="validate" update="' << property.name << 'Flash" '
+            //if (cp.password) sb << "password=\"password\" "
+			if (cp.maxSize) sb << 'maxlength="' << cp.maxSize << '" '
+			if (!cp.editable) sb << 'readonly="readonly" '
+			if (cp.matches) sb << 'pattern="${' << "${domainInstance}.constraints.${property.name}.matches" << '}" '
+			if (isRequired()) sb << 'required="" '
+			sb << 'value="${' << "${domainInstance}?.${property.name}" << '}" />'
 		}
         
         sb as String
-    }
-    
-    
-
-    private renderStringEditor(domainClass, property) {
-        if (!cp) {
-            return "<g:remoteText id=\"${property.name}\" name=\"${property.name}\" paramName=\"${property.name}\" action=\"validate\" update=\"${property.name}Flash\" value=\"\${${domainInstance}?.${property.name}}\" />"
-
-        } else {
-            if ("textarea" == cp.widget || (cp.maxSize > 250 && !cp.password && !cp.inList)) {
-                return "<g:remoteArea id=\"${property.name}\" name=\"${property.name}\" paramName=\"${property.name}\" action=\"validate\" update=\"${property.name}Flash\" cols=\"40\" rows=\"5\" value=\"\${${domainInstance}?.${property.name}}\" />"
-
-            } else if (cp.inList) {
-                return "<g:remoteSelect id=\"${property.name}\" name=\"${property.name}\" from=\"\${${domainInstance}.constraints.${property.name}.inList}\" paramName=\"${property.name}\" action=\"validate\" update=\"${property.name}Flash\" value=\"\${${domainInstance}?.${property.name}}\" valueMessagePrefix=\"${domainClass.propertyName}.${property?.name}\" ${renderNoSelection(property)} />"
-
-            } else {
-                def sb = new StringBuffer("<g:remoteText ")
-
-                if (cp.password) sb << "password=\"password\" "
-                sb << "id=\"${property.name}\" "
-                sb << "name=\"${property.name}\" "
-                sb << "paramName=\"${property.name}\" "
-                sb << "action=\"validate\" "
-                sb << "update=\"${property.name}Flash\" "
-
-                if (cp.maxSize) sb << "maxlength=\"${cp.maxSize}\" "
-                if (!cp.editable) sb << "readonly=\"readonly\" "
-                sb << "value=\"\${${domainInstance}?.${property.name}}\""
-                sb << " />"
-
-                return sb.toString()
-            }
-        }
     }
 
     private renderByteArrayEditor(domainClass, property) {
