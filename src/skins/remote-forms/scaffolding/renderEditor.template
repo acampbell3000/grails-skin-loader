@@ -1,20 +1,20 @@
-<%  if (property.type == Boolean.class || property.type == boolean.class)
+<%  if (property.type == Boolean || property.type == boolean)
         out << renderBooleanEditor(domainClass, property)
-    else if (Number.class.isAssignableFrom(property.type) || (property.type.isPrimitive() && property.type != boolean.class))
+    else if (property.type && Number.isAssignableFrom(property.type) || (property.type?.isPrimitive() && property.type != boolean))
         out << renderNumberEditor(domainClass, property)
-    else if (property.type == String.class)
+    else if (property.type == String)
         out << renderStringEditor(domainClass, property)
-    else if (property.type == Date.class || property.type == java.sql.Date.class || property.type == java.sql.Time.class || property.type == Calendar.class)
+    else if (property.type == Date || property.type == java.sql.Date || property.type == java.sql.Time || property.type == Calendar)
         out << renderDateEditor(domainClass, property)
-    else if (property.type == URL.class)
+    else if (property.type == URL)
         out << renderStringEditor(domainClass, property)
-    else if (property.isEnum())
+    else if (property.type && property.isEnum())
         out << renderEnumEditor(domainClass, property)
-    else if (property.type == TimeZone.class)
+    else if (property.type == TimeZone)
         out << renderSelectTypeEditor("timeZone", domainClass, property)
-    else if (property.type == Locale.class)
+    else if (property.type == Locale)
         out << renderSelectTypeEditor("locale", domainClass, property)
-    else if (property.type == Currency.class)
+    else if (property.type == Currency)
         out << renderSelectTypeEditor("currency", domainClass, property)
     else if (property.type==([] as Byte[]).class) //TODO: Bug in groovy means i have to do this :(
         out << renderByteArrayEditor(domainClass, property)
@@ -28,8 +28,85 @@
         out << renderOneToMany(domainClass, property)
 
     private renderEnumEditor(domainClass, property) {
-        return "<g:select name=\"${property.name}\" from=\"\${${property.type.name}?.values()}\" value=\"\${${domainInstance}?.${property.name}}\" ${renderNoSelection(property)} />"
+		final def sb = new StringBuilder("")
+        sb << '<g:select name="' << property.name << '"'
+ 		sb << ' from="${' << "${property.type.name}?.values()" << '}"'
+ 		sb << ' keys="${' << property.type.name << '.values()*.name()}"'
+		if (isRequired()) sb << ' required=""'
+		sb << ' value="${' << "${domainInstance}?.${property.name}?.name()" << '}"'
+		sb << renderNoSelection(property)
+		sb << '/>'
+		sb as String
     }
+
+    private renderStringEditor(domainClass, property) {
+        final def sb = new StringBuilder("")
+        
+        if (!cp) {
+            sb << '<g:remoteTextField id="' << property.name << '" name="' << property.name << '" '
+            sb << 'paramName="' << property.name << '" action="validate" update="' << property.name << 'Flash" '
+            sb << 'value="${' << "${domainInstance}?.${property.name}" << '}" />'
+            
+        } else if ("textarea" == cp.widget || (cp.maxSize > 250 && !cp.password && !cp.inList)) {
+            sb << '<g:remoteTextArea id="' << property.name << '" name="' << property.name << '" '
+            sb << 'paramName="' << property.name << '" action="validate" update="' << property.name << 'Flash" '
+			sb << 'cols="40" rows="5" '
+			if (cp.maxSize) sb << 'maxlength="' << cp.maxSize << '" '
+			if (isRequired()) sb << 'required="" '
+			sb << ' value="${' << "${domainInstance}?.${property.name}" << '}"'
+			sb << '/>'
+			
+        } else if (cp.inList) {
+			sb << '<g:remoteSelect id="' << property.name << '" name="' << property.name << '" '
+            sb << 'from="${' << "${domainInstance}.constraints.${property.name}.inList" << '}" '
+            sb << 'paramName="' << property.name << '" action="validate" update="' << property.name << 'Flash" '
+			if (isRequired()) sb << 'required="" '
+			sb << 'value="${' << "${domainInstance}?.${property.name}" << '}" '
+			sb << 'valueMessagePrefix="' << "${domainClass.propertyName}.${property.name}" << '" '
+			sb << renderNoSelection(property)
+			sb << '/>'
+			
+		} else {
+			if (cp.password) {
+				sb << '<g:field type="password"'
+			} else if (cp.url) {
+				sb << '<g:field type="url"'
+			} else if (cp.email) {
+				sb << '<g:field type="email"'
+			} else {
+				sb << '<g:textField'
+			}
+			
+			sb << ' name="' << property.name << '"'
+			if (cp.maxSize) sb << ' maxlength="' << cp.maxSize << '"'
+			if (!cp.editable) sb << ' readonly="readonly"'
+			if (cp.matches) sb << ' pattern="${' << "${domainInstance}.constraints.${property.name}.matches" << '}"'
+			if (isRequired()) sb << ' required=""'
+			sb << ' value="${' << "${domainInstance}?.${property.name}" << '}"'
+			sb << '/>'
+			
+			
+                def sb = new StringBuffer("<g:remoteText ")
+
+                if (cp.password) sb << "password=\"password\" "
+                sb << "id=\"${property.name}\" "
+                sb << "name=\"${property.name}\" "
+                sb << "paramName=\"${property.name}\" "
+                sb << "action=\"validate\" "
+                sb << "update=\"${property.name}Flash\" "
+
+                if (cp.maxSize) sb << "maxlength=\"${cp.maxSize}\" "
+                if (!cp.editable) sb << "readonly=\"readonly\" "
+                sb << "value=\"\${${domainInstance}?.${property.name}}\""
+                sb << " />"
+
+                return sb.toString()
+		}
+        
+        sb as String
+    }
+    
+    
 
     private renderStringEditor(domainClass, property) {
         if (!cp) {
@@ -40,24 +117,24 @@
                 return "<g:remoteArea id=\"${property.name}\" name=\"${property.name}\" paramName=\"${property.name}\" action=\"validate\" update=\"${property.name}Flash\" cols=\"40\" rows=\"5\" value=\"\${${domainInstance}?.${property.name}}\" />"
 
             } else if (cp.inList) {
-				return "<g:remoteSelect id=\"${property.name}\" name=\"${property.name}\" from=\"\${${domainInstance}.constraints.${property.name}.inList}\" paramName=\"${property.name}\" action=\"validate\" update=\"${property.name}Flash\" value=\"\${${domainInstance}?.${property.name}}\" valueMessagePrefix=\"${domainClass.propertyName}.${property?.name}\" ${renderNoSelection(property)} />"
+                return "<g:remoteSelect id=\"${property.name}\" name=\"${property.name}\" from=\"\${${domainInstance}.constraints.${property.name}.inList}\" paramName=\"${property.name}\" action=\"validate\" update=\"${property.name}Flash\" value=\"\${${domainInstance}?.${property.name}}\" valueMessagePrefix=\"${domainClass.propertyName}.${property?.name}\" ${renderNoSelection(property)} />"
 
-			} else {
-				def sb = new StringBuffer("<g:remoteText ")
+            } else {
+                def sb = new StringBuffer("<g:remoteText ")
 
-				if (cp.password) sb << "password=\"password\" "
-				sb << "id=\"${property.name}\" "
-				sb << "name=\"${property.name}\" "
-				sb << "paramName=\"${property.name}\" "
-				sb << "action=\"validate\" "
-				sb << "update=\"${property.name}Flash\" "
+                if (cp.password) sb << "password=\"password\" "
+                sb << "id=\"${property.name}\" "
+                sb << "name=\"${property.name}\" "
+                sb << "paramName=\"${property.name}\" "
+                sb << "action=\"validate\" "
+                sb << "update=\"${property.name}Flash\" "
 
-				if (cp.maxSize) sb << "maxlength=\"${cp.maxSize}\" "
-				if (!cp.editable) sb << "readonly=\"readonly\" "
-				sb << "value=\"\${${domainInstance}?.${property.name}}\""
-				sb << " />"
+                if (cp.maxSize) sb << "maxlength=\"${cp.maxSize}\" "
+                if (!cp.editable) sb << "readonly=\"readonly\" "
+                sb << "value=\"\${${domainInstance}?.${property.name}}\""
+                sb << " />"
 
-				return sb.toString()
+                return sb.toString()
             }
         }
     }
@@ -68,45 +145,85 @@
 
     private renderManyToOne(domainClass,property) {
         if (property.association) {
-            return "<g:remoteSelect id=\"${property.name}\" name=\"${property.name}.id\" from=\"\${${property.type.name}.list()}\" optionKey=\"id\" paramName=\"${property.name}\" action=\"validate\" update=\"${property.name}Flash\" value=\"\${${domainInstance}?.${property.name}?.id}\" ${renderNoSelection(property)} />"
+			def sb = new StringBuilder()
+            sb << '<g:select'
+			// id is "x" and name is "x.id" as the label will have for="x" and "." in an id will confuse CSS
+ 			sb << ' id="' << property.name << '"'
+ 			sb << ' name="' << property.name << '.id"'
+ 			sb << ' from="${' << property.type.name << '.list()}"'
+ 			sb << ' optionKey="id"'
+			if (isRequired()) sb << ' required=""'
+ 			sb << ' value="${' << "${domainInstance}?.${property.name}" << '?.id}"'
+ 			sb << ' class="many-to-one"'
+ 			sb << renderNoSelection(property)
+ 			sb << '/>'
+			sb as String
         }
     }
 
     private renderManyToMany(domainClass, property) {
-        return "<g:remoteSelect id=\"${property.name}\" name=\"${property.name}\" from=\"\${${property.referencedDomainClass.fullName}.list()}\" multiple=\"yes\" optionKey=\"id\" size=\"5\" paramName=\"${property.name}\" action=\"validate\" update=\"${property.name}Flash\" value=\"\${${domainInstance}?.${property.name}}\" />"
+		def sb = new StringBuilder()
+        sb << '<g:select name="' << property.name << '"'
+ 		sb << ' from="${' << property.referencedDomainClass.fullName << '.list()}"'
+ 		sb << ' multiple="multiple"'
+ 		sb << ' optionKey="id"'
+ 		sb << ' size="5"'
+		if (isRequired()) sb << ' required=""'
+ 		sb << ' value="${' << "${domainInstance}?.${property.name}" << '*.id}"'
+ 		sb << ' class="many-to-many"'
+ 		sb << '/>'
+		sb as String
     }
 
     private renderOneToMany(domainClass, property) {
         def sw = new StringWriter()
         def pw = new PrintWriter(sw)
         pw.println()
-        pw.println "<ul>"
+        pw.println '<ul class="one-to-many">'
         pw.println "<g:each in=\"\${${domainInstance}?.${property.name}?}\" var=\"${property.name[0]}\">"
         pw.println "    <li><g:link controller=\"${property.referencedDomainClass.propertyName}\" action=\"show\" id=\"\${${property.name[0]}.id}\">\${${property.name[0]}?.encodeAsHTML()}</g:link></li>"
-        pw.println "</g:each>"
-        pw.println "</ul>"
+        pw.println '</g:each>'
+		pw.println '<li class="add">'
         pw.println "<g:link controller=\"${property.referencedDomainClass.propertyName}\" action=\"create\" params=\"['${domainClass.propertyName}.id': ${domainInstance}?.id]\">\${message(code: 'default.add.label', args: [message(code: '${property.referencedDomainClass.propertyName}.label', default: '${property.referencedDomainClass.shortName}')])}</g:link>"
+		pw.println '</li>'
+        pw.println '</ul>'
         return sw.toString()
     }
 
     private renderNumberEditor(domainClass, property) {
         if (!cp) {
-            if (property.type == Byte.class) {
-                return "<g:remoteSelect id=\"${property.name}\" name=\"${property.name}\" from=\"\${-128..127}\" paramName=\"${property.name}\" action=\"validate\" update=\"${property.name}Flash\" value=\"\${fieldValue(bean: ${domainInstance}, field: '${property.name}')}\" />"
-
+            if (property.type == Byte) {
+                return "<g:select name=\"${property.name}\" from=\"\${-128..127}\" class=\"range\" value=\"\${fieldValue(bean: ${domainInstance}, field: '${property.name}')}\" />"
             } else {
-                return "<g:remoteText id=\"${property.name}\" name=\"${property.name}\" paramName=\"${property.name}\" action=\"validate\" update=\"${property.name}Flash\" value=\"\${fieldValue(bean: ${domainInstance}, field: '${property.name}')}\" />"
+                return "<g:field type=\"number\" name=\"${property.name}\" value=\"\${fieldValue(bean: ${domainInstance}, field: '${property.name}')}\" />"
             }
         } else {
+	        def sb = new StringBuilder()
             if (cp.range) {
-                return "<g:remoteSelect id=\"${property.name}\" name=\"${property.name}\" from=\"\${${cp.range.from}..${cp.range.to}}\" paramName=\"${property.name}\" action=\"validate\" update=\"${property.name}Flash\" value=\"\${fieldValue(bean: ${domainInstance}, field: '${property.name}')}\" ${renderNoSelection(property)} />"
-
-			} else if (cp.inList) {
-                return "<g:remoteSelect id=\"${property.name}\" name=\"${property.name}\" from=\"\${${domainClass.propertyName}.constraints.${property.name}.inList}\" paramName=\"${property.name}\" action=\"validate\" update=\"${property.name}Flash\" value=\"\${fieldValue(bean: ${domainInstance}, field: '${property.name}')}\" valueMessagePrefix=\"${domainClass.propertyName}.${property?.name}\" ${renderNoSelection(property)} />"
-
-			} else {
-                return "<g:remoteText id=\"${property.name}\" name=\"${property.name}\" paramName=\"${property.name}\" action=\"validate\" update=\"${property.name}Flash\" value=\"\${fieldValue(bean: ${domainInstance}, field: '${property.name}')}\" />"
+                sb << '<g:select name="' << property.name << '"'
+ 				sb << ' from="${' << "${cp.range.from}..${cp.range.to}" << '}"'
+ 				sb << ' class="range"'
+				if (isRequired()) sb << ' required=""'
+				sb << ' value="${' << "fieldValue(bean: ${domainInstance}, field: '${property.name}')" << '}"'
+				sb << renderNoSelection(property)
+				sb << '/>'
+            } else if (cp.inList) {
+                sb << '<g:select name="' << property.name << '"'
+ 				sb << ' from="${' << "${domainInstance}.constraints.${property.name}.inList" << '}"'
+				if (isRequired()) sb << ' required=""'
+				sb << ' value="${' << "fieldValue(bean: ${domainInstance}, field: '${property.name}')" << '}"'
+				sb << ' valueMessagePrefix="' << "${domainClass.propertyName}.${property.name}" << '"'
+				sb << renderNoSelection(property)
+				sb << '/>'
+            } else {
+				sb << '<g:field type="number" name="' << property.name << '"'
+				if (cp.min != null) sb << ' min="' << cp.min << '"'
+				if (cp.max != null) sb << ' max="' << cp.max << '"'
+				if (isRequired()) sb << ' required=""'
+				sb << ' value="${' << "fieldValue(bean: ${domainInstance}, field: '${property.name}')" << '}"'
+				sb << '/>'
             }
+			sb as String
         }
      }
 
@@ -114,34 +231,34 @@
         if (!cp) {
             return "<g:checkBox name=\"${property.name}\" value=\"\${${domainInstance}?.${property.name}}\" />"
         } else {
-            def sb = new StringBuffer("<g:checkBox name=\"${property.name}\" ")
-
+            def sb = new StringBuilder("<g:checkBox name=\"${property.name}\" ")
             if (cp.widget) sb << "widget=\"${cp.widget}\" ";
             cp.attributes.each { k, v ->
                 sb << "${k}=\"${v}\" "
             }
             sb << "value=\"\${${domainInstance}?.${property.name}}\" />"
-
             return sb.toString()
         }
     }
 
     private renderDateEditor(domainClass, property) {
-        def precision = (property.type == Date.class || property.type == java.sql.Date.class || property.type == Calendar.class) ? "day" : "minute";
+        def precision = (property.type == Date || property.type == java.sql.Date || property.type == Calendar) ? "day" : "minute";
         if (!cp) {
             return "<g:datePicker name=\"${property.name}\" precision=\"${precision}\" value=\"\${${domainInstance}?.${property.name}}\" />"
         } else {
             if (!cp.editable) {
                 return "\${${domainInstance}?.${property.name}?.toString()}"
             } else {
-                def sb = new StringBuffer("<g:datePicker name=\"${property.name}\" ")
-
+                def sb = new StringBuilder("<g:datePicker name=\"${property.name}\" ")
                 if (cp.format) sb << "format=\"${cp.format}\" "
                 if (cp.widget) sb << "widget=\"${cp.widget}\" "
                 cp.attributes.each { k, v ->
                     sb << "${k}=\"${v}\" "
                 }
-                sb << "precision=\"${precision}\" value=\"\${${domainInstance}?.${property.name}}\" ${renderNoSelection(property)} />"
+                if (!cp.attributes.precision){
+                    sb << "precision=\"${precision}\" "
+                }
+                sb << " value=\"\${${domainInstance}?.${property.name}}\" ${renderNoSelection(property)} />"
 
                 return sb.toString()
             }
@@ -152,27 +269,39 @@
         if (!cp) {
             return "<g:${type}Select name=\"${property.name}\" value=\"\${${domainInstance}?.${property.name}}\" />"
         } else {
-            def sb = new StringBuffer("<g:${type}Select name=\"${property.name}\" ")
-
+            def sb = new StringBuilder("<g:${type}Select name=\"${property.name}\" ")
             if (cp.widget) sb << "widget=\"${cp.widget}\" ";
             cp.attributes.each { k, v ->
                 sb << "${k}=\"${v}\" "
             }
             sb << "value=\"\${${domainInstance}?.${property.name}}\" ${renderNoSelection(property)} />"
-
             return sb.toString()
         }
     }
 
     private renderNoSelection(property) {
-        if (property.optional) {
+        if (isOptional()) {
             if (property.manyToOne || property.oneToOne) {
-                return "noSelection=\"['null': '']\""
+                return " noSelection=\"['null': '']\""
+            } else if (property.type == Date || property.type == java.sql.Date || property.type == java.sql.Time || property.type == Calendar) {
+                return "default=\"none\" noSelection=\"['': '']\""
             } else {
-                return "noSelection=\"['': '']\""
+                return " noSelection=\"['': '']\""
             }
         }
-
         return ""
     }
+
+	private boolean isRequired() {
+		!isOptional()
+	}
+
+	private boolean isOptional() {
+	    if(!cp) {
+	        return false
+	    }
+	    else {
+	        cp.nullable || (cp.propertyType == String && cp.blank) || cp.propertyType in [boolean, Boolean]
+	    }
+	}
 %>
