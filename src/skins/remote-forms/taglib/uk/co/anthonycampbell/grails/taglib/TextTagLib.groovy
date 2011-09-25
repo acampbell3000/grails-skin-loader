@@ -22,6 +22,9 @@ import org.springframework.web.servlet.support.RequestContextUtils as RCU
  * </ul>
  */
 class TextTagLib {
+	// Declare namespace
+	static namespace = "skin-loader"
+	
 	// Initialise lib property
 	def typeConverter = new SimpleTypeConverter()
 
@@ -78,7 +81,7 @@ class TextTagLib {
 	 * Based on the standard "remoteField" tag library. Supports additional attributes
 	 * such as "readonly" and "password".
 	 */
-	def remoteText = { attrs, body ->
+	def ajaxTextField = { attrs, body ->
 		// Get attributes
 		def paramName = attrs.paramName ? attrs.remove('paramName') : 'value'
 		def value = attrs.remove('value')
@@ -116,6 +119,34 @@ class TextTagLib {
 		attrs.remove('url')
 		attrs.each {
 			k,v-> out << " $k=\"$v\""
+		}
+		out <<" />"
+	}
+	
+	
+	def remoteField = { attrs, body ->
+		def paramName = attrs.paramName ? attrs.remove('paramName') : 'value'
+		def value = attrs.remove('value')
+		if (!value) value = ''
+		out << "<input type=\"text\" name=\"${attrs.remove('name')}\" value=\"${value}\" onkeyup=\""
+
+		if (attrs.params) {
+			if (attrs.params instanceof Map) {
+				attrs.params[paramName] = new JavascriptValue('this.value')
+			}
+			else {
+				attrs.params += "+'${paramName}='+this.value"
+			}
+		}
+		else {
+			attrs.params = "'${paramName}='+this.value"
+		}
+		out << remoteFunction(attrs)
+		attrs.remove('params')
+		out << "\""
+		attrs.remove('url')
+		attrs.each { k,v->
+			out << " $k=\"$v\""
 		}
 		out <<" />"
 	}
