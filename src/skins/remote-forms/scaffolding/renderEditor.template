@@ -29,34 +29,37 @@
 
     private renderEnumEditor(domainClass, property) {
 		final def sb = new StringBuilder("")
-        sb << '<g:select name="' << property.name << '"'
- 		sb << ' from="${' << "${property.type.name}?.values()" << '}"'
- 		sb << ' keys="${' << property.type.name << '.values()*.name()}"'
-		if (isRequired()) sb << ' required=""'
-		sb << ' value="${' << "${domainInstance}?.${property.name}?.name()" << '}"'
-		sb << renderNoSelection(property)
-		sb << '/>'
-		sb as String
+		
+        sb << '<skin-loader:remoteSelect' id="' << property.name << '" name="' << property.name << '" '
+        sb << 'paramName="' << property.name << '" action="validate" update="' << property.name << 'Flash" '
+        sb << 'from="${' << property.type.name << '.values()}" '
+        sb << 'keys="${' << property.type.name << '.values()*.name()}" '
+        if (isRequired()) sb << 'required="" '
+        sb << 'value="${' << "${domainInstance}?.${property.name}?.name()" << '}" '
+        sb << renderNoSelection(property)
+        sb << '/>'
+        
+        sb as String
     }
 
     private renderStringEditor(domainClass, property) {
         final def sb = new StringBuilder("")
         
         if (!cp) {
-            sb << '<g:remoteTextField id="' << property.name << '" name="' << property.name << '" '
+            sb << '<skin-loader:remoteTextField id="' << property.name << '" name="' << property.name << '" '
             sb << 'paramName="' << property.name << '" action="validate" update="' << property.name << 'Flash" '
             sb << 'value="${' << "${domainInstance}?.${property.name}" << '}" />'
             
         } else if ("textarea" == cp.widget || (cp.maxSize > 250 && !cp.password && !cp.inList)) {
-            sb << '<g:remoteTextArea id="' << property.name << '" name="' << property.name << '" '
+            sb << '<skin-loader:remoteTextArea id="' << property.name << '" name="' << property.name << '" '
             sb << 'paramName="' << property.name << '" action="validate" update="' << property.name << 'Flash" '
 			sb << 'cols="40" rows="5" '
 			if (cp.maxSize) sb << 'maxlength="' << cp.maxSize << '" '
 			if (isRequired()) sb << 'required="" '
-			sb << ' value="${' << "${domainInstance}?.${property.name}" << '}" />'
+			sb << 'value="${' << "${domainInstance}?.${property.name}" << '}" />'
 			
         } else if (cp.inList) {
-			sb << '<g:remoteSelect id="' << property.name << '" name="' << property.name << '" '
+			sb << '<skin-loader:remoteSelect id="' << property.name << '" name="' << property.name << '" '
             sb << 'from="${' << "${domainInstance}.constraints.${property.name}.inList" << '}" '
             sb << 'paramName="' << property.name << '" action="validate" update="' << property.name << 'Flash" '
 			if (isRequired()) sb << 'required="" '
@@ -66,19 +69,11 @@
 			sb << '/>'
 			
 		} else {
-			if (cp.password) {
-				sb << '<g:field type="password" '
-			} else if (cp.url) {
-				sb << '<g:field type="url" '
-			} else if (cp.email) {
-				sb << '<g:field type="email" '
-			} else {
-				sb << '<g:remoteText '
-			}
-			
-			sb << 'id="' << property.name << '" name="' << property.name << '" '
+            sb << '<skin-loader:remoteTextField id="' << property.name << '" name="' << property.name << '" '
             sb << 'paramName="' << property.name << '" action="validate" update="' << property.name << 'Flash" '
-            //if (cp.password) sb << "password=\"password\" "
+            if (cp.password) sb << 'type="password" '
+            if (cp.url) sb << 'type="url" '
+            if (cp.email) sb << 'type="email" '
 			if (cp.maxSize) sb << 'maxlength="' << cp.maxSize << '" '
 			if (!cp.editable) sb << 'readonly="readonly" '
 			if (cp.matches) sb << 'pattern="${' << "${domainInstance}.constraints.${property.name}.matches" << '}" '
@@ -90,57 +85,88 @@
     }
 
     private renderByteArrayEditor(domainClass, property) {
-        return "<input type=\"file\" id=\"${property.name}\" name=\"${property.name}\" />"
+        //return "<input type=\"file\" id=\"${property.name}\" name=\"${property.name}\" />"
+        
+        final def sb = new StringBuilder("")
+        
+        sb << '<uploader:uploader id="' << property.name << '" name="' << property.name << '"'
+        //sb << ' url="\${[controller: \'' << property.referencedDomainClass.propertyName << '\', action: \'yourAction\']}"'
+        sb << '>\n'
+        
+        sb << "<uploader:onProgress>\n"
+        sb << "    \$('" << property.name << "Flash').update('"
+        //sb << "Upload progress: \' \+ fileName \+ \'%"
+        sb << message(code: 'skinloader.upload.progress', default: 'Uploading...', args: [total])
+        sb << "')\n"
+        sb << "</uploader:onProgress>\n"
+        sb << "<uploader:onComplete>\n"
+        sb << "    \$('" << property.name << "Flash').update('"
+        //sb << "File upload complete: \' \+ fileName"
+        sb << message(code: 'skinloader.upload.complete', default: 'File upload complete', args: [fileName])
+        sb << "')\n"
+        sb << "</uploader:onComplete>\n"
+        sb << "<uploader:onCancel>\n"
+        sb << "    \$('" << property.name << "Flash').update('"
+        //sb << "File upload cancelled!"
+        sb << message(code: 'skinloader.upload.cancelled', default: 'File upload cancelled!')
+        sb << "')\n"
+        sb << "</uploader:onCancel>\n"
+        
+        sb << '</uploader:uploader>'
+
+        sb as String
     }
 
-    private renderManyToOne(domainClass,property) {
+    private renderManyToOne(domainClass, property) {
         if (property.association) {
-			def sb = new StringBuilder()
-            sb << '<g:select'
-			// id is "x" and name is "x.id" as the label will have for="x" and "." in an id will confuse CSS
- 			sb << ' id="' << property.name << '"'
- 			sb << ' name="' << property.name << '.id"'
- 			sb << ' from="${' << property.type.name << '.list()}"'
- 			sb << ' optionKey="id"'
-			if (isRequired()) sb << ' required=""'
- 			sb << ' value="${' << "${domainInstance}?.${property.name}" << '?.id}"'
- 			sb << ' class="many-to-one"'
+			final def sb = new StringBuilder()
+			
+            sb << '<skin-loader:remoteSelect' id="' << property.name << '" name="' << property.name << '" '
+            sb << 'paramName="' << property.name << '" action="validate" update="' << property.name << 'Flash" '
+ 			sb << 'from="${' << property.type.name << '.list()}" ' << 'optionKey="id" '
+			if (isRequired()) sb << 'required="" '
+ 			sb << 'value="${' << "${domainInstance}?.${property.name}" << '?.id}" '
  			sb << renderNoSelection(property)
  			sb << '/>'
+ 			
 			sb as String
         }
     }
 
     private renderManyToMany(domainClass, property) {
-		def sb = new StringBuilder()
-        sb << '<g:select name="' << property.name << '"'
- 		sb << ' from="${' << property.referencedDomainClass.fullName << '.list()}"'
- 		sb << ' multiple="multiple"'
- 		sb << ' optionKey="id"'
- 		sb << ' size="5"'
-		if (isRequired()) sb << ' required=""'
- 		sb << ' value="${' << "${domainInstance}?.${property.name}" << '*.id}"'
- 		sb << ' class="many-to-many"'
+		final def sb = new StringBuilder()
+		
+        sb << '<skin-loader:remoteSelect' id="' << property.name << '" name="' << property.name << '" '
+        sb << 'paramName="' << property.name << '" action="validate" update="' << property.name << 'Flash" '
+ 		sb << 'from="${' << property.referencedDomainClass.fullName << '.list()}" '
+ 		sb << 'multiple="multiple" optionKey="id" size="5" '
+		if (isRequired()) sb << 'required="" '
+ 		sb << 'value="${' << "${domainInstance}?.${property.name}" << '*.id}" '
  		sb << '/>'
+		
 		sb as String
     }
 
     private renderOneToMany(domainClass, property) {
-        def sw = new StringWriter()
-        def pw = new PrintWriter(sw)
+        final def sw = new StringWriter()
+        final def pw = new PrintWriter(sw)
+        
         pw.println()
-        pw.println '<ul class="one-to-many">'
+        pw.println '<ul>'
         pw.println "<g:each in=\"\${${domainInstance}?.${property.name}?}\" var=\"${property.name[0]}\">"
         pw.println "    <li><g:link controller=\"${property.referencedDomainClass.propertyName}\" action=\"show\" id=\"\${${property.name[0]}.id}\">\${${property.name[0]}?.encodeAsHTML()}</g:link></li>"
         pw.println '</g:each>'
 		pw.println '<li class="add">'
-        pw.println "<g:link controller=\"${property.referencedDomainClass.propertyName}\" action=\"create\" params=\"['${domainClass.propertyName}.id': ${domainInstance}?.id]\">\${message(code: 'default.add.label', args: [message(code: '${property.referencedDomainClass.propertyName}.label', default: '${property.referencedDomainClass.shortName}')])}</g:link>"
+        pw.println "    <g:link controller=\"${property.referencedDomainClass.propertyName}\" action=\"create\" params=\"['${domainClass.propertyName}.id': ${domainInstance}?.id]\">\${message(code: 'default.add.label', args: [message(code: '${property.referencedDomainClass.propertyName}.label', default: '${property.referencedDomainClass.shortName}')])}</g:link>"
 		pw.println '</li>'
         pw.println '</ul>'
+        
         return sw.toString()
     }
 
     private renderNumberEditor(domainClass, property) {
+        // CONTINUE...
+    
         if (!cp) {
             if (property.type == Byte) {
                 return "<g:select name=\"${property.name}\" from=\"\${-128..127}\" class=\"range\" value=\"\${fieldValue(bean: ${domainInstance}, field: '${property.name}')}\" />"
@@ -216,6 +242,9 @@
     }
 
     private renderSelectTypeEditor(type, domainClass,property) {
+        final def sb = new StringBuilder("")
+        sb << '<g:remote${type?.capitalize()}Select id="' << property.name << '" name="${property.name}" '
+        
         if (!cp) {
             return "<g:${type}Select name=\"${property.name}\" value=\"\${${domainInstance}?.${property.name}}\" />"
         } else {
@@ -225,8 +254,10 @@
                 sb << "${k}=\"${v}\" "
             }
             sb << "value=\"\${${domainInstance}?.${property.name}}\" ${renderNoSelection(property)} />"
-            return sb.toString()
+            
         }
+        
+        sb as String
     }
 
     private renderNoSelection(property) {
@@ -234,11 +265,12 @@
             if (property.manyToOne || property.oneToOne) {
                 return " noSelection=\"['null': '']\""
             } else if (property.type == Date || property.type == java.sql.Date || property.type == java.sql.Time || property.type == Calendar) {
-                return "default=\"none\" noSelection=\"['': '']\""
+                return " default=\"none\" noSelection=\"['': '']\""
             } else {
                 return " noSelection=\"['': '']\""
             }
         }
+        
         return ""
     }
 
@@ -247,10 +279,9 @@
 	}
 
 	private boolean isOptional() {
-	    if(!cp) {
+	    if (!cp) {
 	        return false
-	    }
-	    else {
+	    } else {
 	        cp.nullable || (cp.propertyType == String && cp.blank) || cp.propertyType in [boolean, Boolean]
 	    }
 	}
