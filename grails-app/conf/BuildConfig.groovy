@@ -5,11 +5,12 @@ grails.project.test.reports.dir = "target/test-reports"
 //grails.project.war.file = "target/${appName}-${appVersion}.war"
 
 grails.project.dependency.resolution = {
-    // inherit Grails' default dependencies
+    // Inherit Grails' default dependencies
     inherits("global") {
         // uncomment to disable ehcache
         // excludes 'ehcache'
     }
+	
     log "error" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     checksums true // Whether to verify checksums on resolve
 
@@ -19,7 +20,7 @@ grails.project.dependency.resolution = {
         grailsHome()
         grailsCentral()
 
-        // uncomment these to enable remote dependency resolution from public Maven repositories
+        // Uncomment these to enable remote dependency resolution from public Maven repositories
         //mavenCentral()
         //mavenLocal()
         //mavenRepo "http://snapshots.repository.codehaus.org"
@@ -27,6 +28,7 @@ grails.project.dependency.resolution = {
         //mavenRepo "http://download.java.net/maven/2/"
         //mavenRepo "http://repository.jboss.com/maven2/"
     }
+	
     dependencies {
         // specify dependencies here under either 'build', 'compile', 'runtime', 'test' or 'provided' scopes eg.
 
@@ -34,11 +36,11 @@ grails.project.dependency.resolution = {
     }
 
     plugins {
-        compile ":hibernate:$grailsVersion"
-        compile ":jquery:1.6.1.1"
-        compile ":resources:1.0.2"
-        compile ":release:1.0.0.RC3"
-
         build ":tomcat:$grailsVersion"
+		
+        compile ":hibernate:$grailsVersion"
+        compile ":release:1.0.0.RC3"
+		
+		runtime ":ajax-uploader:0.5"
     }
 }
