@@ -4,6 +4,7 @@ TODO:
 - Add namespace for taglib
 - Tests for tag lib.
 - Perhaps split text / form tags?
+- Include remote versions for all new input types (date picker etc...)
 
 Potential improvements:
 - TextTagLibrary refactor / clean-up.
